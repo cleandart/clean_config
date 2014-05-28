@@ -3,3 +3,4 @@ version: 0.0.0
 author: Clean Team <clean@vacuumlabs.com>
 dependencies:
   useful: any
+  
