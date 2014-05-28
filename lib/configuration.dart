@@ -22,37 +22,29 @@ $(dynamic computation(ConfigMap config)) => new ComputedValue(computation);
 class ConfigMap {
   ConfigMap root;
   Map _data;
+  
+  _convert(Map map, condition, convertValue) {
+    var res = {};
+    map.forEach((k, v)) {
+      v = if (condition(v)) convertValue(v);
+      res[k] = v;
+    }
+  }
   /**
    * Recursively converts [other] to [ConfigMap].
    */
   ConfigMap({ConfigMap this.root: null, Map other: const {}}) {
     if (root == null) root = this;
-    _data = {};
-    other.forEach((k,v) {
-      if (v is! Map) {
-        _data[k] = v;
-      } else {
-        _data[k] = new ConfigMap(root:root,other:v);
-      }
-    });
+    _data = _convert(other, (v) => v is Map, (v) => new ConfigMap(root: root, other: v));
   }
 
   /**
    * Recursively converts to [Map]
    */
   Map toMap() {
-    var res = {};
-    _data.forEach((k,v) {
-      if (v is ConfigMap) {
-        res[k] = v.toMap();
-      } else {
-        res[k] = this[k];
-      }
-    });
-    return res;
+    return _convert(_data, (v) => v is ConfigMap, (v) => v.toMap());
   }
 
-  ConfigMap.config(ConfigMap this.root, Map this._data);
   operator[](key) => _data[key] is ComputedValue ? _data[key].getValue(root) : _data[key];
 }
 
@@ -78,12 +70,14 @@ class Configuration {
    * Throws [ArgumentError] if configuration with [name] does not exists.
    */
   Map get(name) {
-    if (!_configurations.containsKey(name)) throw new ArgumentError("Configuration does not exist");
+    if (!_configurations.containsKey(name)) throw new ArgumentError("Configuration does not exist.");
     var config = _configurations[name];
-    if (config["parent"] == null) {
-      return config["configMap"].toMap();
-    } else {
-      return mergeMaps(get(config["parent"]), config["configMap"]);
-    }
+    var parent = config["parent"];
+    
+    var configMap = config["configMap"];
+    
+    if (parent != null) configMap = mergeMaps(get(parent), configMap);
+    
+    return configMap.toMap();
   }
 }
