@@ -4,7 +4,7 @@ import 'package:useful/useful.dart';
 
 class ComputedValue {
   final _computation;
-  bool _evaluated;
+  bool _evaluated = false;
   dynamic _value;
   ComputedValue(dynamic this._computation(ConfigMap config));
 
@@ -25,8 +25,9 @@ class ConfigMap {
   /**
    * Recursively converts [other] to [ConfigMap].
    */
-  ConfigMap({ConfigMap root: null, Map other: const {}}) {
+  ConfigMap({ConfigMap this.root: null, Map other: const {}}) {
     if (root == null) root = this;
+    _data = {};
     other.forEach((k,v) {
       if (v is! Map) {
         _data[k] = v;
@@ -37,10 +38,15 @@ class ConfigMap {
   }
 
   Map toMap() {
-    var res = new Map.from(_data);
+    var res = {};
     _data.forEach((k,v) {
-
+      if (v is ConfigMap) {
+        res[k] = v.toMap();
+      } else {
+        res[k] = this[k];
+      }
     });
+    return res;
   }
 
   ConfigMap.config(ConfigMap this.root, Map this._data);
@@ -49,12 +55,13 @@ class ConfigMap {
 
 class Configuration {
 
-  static final Map<String, Map > _configurations = {};
+  final Map<String, Map > _configurations = {};
 
   /**
    * Register configuration under [name].
    */
-  void add(String name, Map configuration, {String parent}) {
+  void add(String name, Map configuration, {String parent: null}) {
+    configuration['__name__'] = name;
     _configurations[name] = {
       "parent": parent,
       "configMap": new ConfigMap(other:configuration)
@@ -68,10 +75,12 @@ class Configuration {
    * Throws [ArgumentError] if configuration with [name] does not exists.
    */
   Map get(name) {
-    if (_configurations.containsKey(name)) throw new ArgumentError("Configuration does not exist");
+    if (!_configurations.containsKey(name)) throw new ArgumentError("Configuration does not exist");
     var config = _configurations[name];
     if (config["parent"] == null) {
-
+      return config["configMap"].toMap();
+    } else {
+      return mergeMaps(get(config["parent"]), config["configMap"]);
     }
   }
 }
