@@ -1,7 +1,8 @@
 name: clean_config
 version: 0.1.0
 author: Clean Team <clean@vacuumlabs.com>
-dependencies:
-  useful: any
+description: Simple library for managing configuration.
+homepage: https://github.com/cleandart/clean_config
+documentation: https://github.com/cleandart/clean_config
 dev_dependencies:
-  unittest: any
+  unittest: '>=0.11.0 <0.12.0'

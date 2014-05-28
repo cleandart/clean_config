@@ -1,6 +1,20 @@
-library configuration;
+// Copyright (c) 2013, the Clean project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
-import 'package:useful/useful.dart';
+library clean_config;
+
+Map mergeMaps(Map a, Map b) {
+  a = new Map.from(a);
+  b = new Map.from(b);
+
+  b.forEach((k, v) {
+    if (a[k] is Map && v is Map) v = mergeMaps(a[k], v);
+    a[k] = v;
+  });
+
+  return a;
+}
 
 class ComputedValue {
   final _computation;
@@ -76,7 +90,7 @@ class Configuration {
 
     var configMap = config["configMap"];
 
-    if (parent != null) configMap = mergeMaps(get(parent)..remove('__name__'), config["configMap"]);
+    if (parent != null) configMap = mergeMaps(get(parent), config["configMap"]);
 
     return new ConfigMap(configMap).toMap();
   }

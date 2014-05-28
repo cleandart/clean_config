@@ -1,6 +1,10 @@
+// Copyright (c) 2013, the Clean project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 import 'package:unittest/unittest.dart';
-import 'package:clean_config/configuration.dart' as c;
-import 'package:clean_config/configuration.dart';
+import 'package:clean_config/clean_config.dart' as c;
+import 'package:clean_config/clean_config.dart';
 
 main() {
   run();
@@ -17,6 +21,44 @@ run() {
         "title": "My new homepage",
         "url": $((c) => c['__name__']), // and reference other values in config
       },
+    });
+  });
+
+  test("Merge maps.", () {
+    // given
+    var a = {
+        'author': {
+          'name': 'John',
+          'age': 47,
+        },
+        'contractor': 'Peter Pan',
+    };
+
+    var b = {
+        'author': {
+          'surname': 'Mensah',
+          'age': 48,
+        },
+        'contractor': {
+          'name': 'Peter',
+          'surname': 'Pan',
+        },
+    };
+
+    // when
+    var result = mergeMaps(a, b);
+
+    // then
+    expect(result, {
+        'author': {
+          'name': 'John',
+          'surname': 'Mensah',
+          'age': 48,
+        },
+        'contractor': {
+          'name': 'Peter',
+          'surname': 'Pan',
+        },
     });
   });
 
