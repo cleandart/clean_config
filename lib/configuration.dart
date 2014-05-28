@@ -37,6 +37,9 @@ class ConfigMap {
     });
   }
 
+  /**
+   * Recursively converts to [Map]
+   */
   Map toMap() {
     var res = {};
     _data.forEach((k,v) {
