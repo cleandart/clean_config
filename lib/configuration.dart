@@ -22,27 +22,27 @@ $(dynamic computation(ConfigMap config)) => new ComputedValue(computation);
 class ConfigMap {
   ConfigMap root;
   Map _data;
-  
-  _convert(Map map, condition, convertValue) {
+
+  Map _convert(Map map, getValue) {
     var res = {};
-    map.forEach((k, v)) {
-      v = if (condition(v)) convertValue(v);
-      res[k] = v;
-    }
+    map.forEach((k, v) {
+      res[k] = getValue(k,v);
+    });
+    return res;
   }
   /**
    * Recursively converts [other] to [ConfigMap].
    */
   ConfigMap(other, {ConfigMap this.root: null}) {
     if (root == null) root = this;
-    _data = _convert(other, (v) => v is Map, (v) => new ConfigMap(root: root, other: v));
+    _data = _convert(other, (k,v) => v is Map ? new ConfigMap(v, root:root) : v);
   }
 
   /**
    * Recursively converts to [Map]
    */
   Map toMap() {
-    return _convert(_data, (v) => v is ConfigMap, (v) => v.toMap());
+    return _convert(_data, (k,v) => v is ConfigMap ? v.toMap() : this[k]);
   }
 
   operator[](key) => _data[key] is ComputedValue ? _data[key].getValue(root) : _data[key];
@@ -73,11 +73,11 @@ class Configuration {
     if (!_configurations.containsKey(name)) throw new ArgumentError("Configuration does not exist.");
     var config = _configurations[name];
     var parent = config["parent"];
-    
+
     var configMap = config["configMap"];
-    
-    if (parent != null) configMap = mergeMaps(get(parent), configMap);
-    
+
+    if (parent != null) configMap = mergeMaps(get(parent)..remove('__name__'), config["configMap"]);
+
     return new ConfigMap(configMap).toMap();
   }
 }
