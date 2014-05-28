@@ -33,7 +33,7 @@ class ConfigMap {
   /**
    * Recursively converts [other] to [ConfigMap].
    */
-  ConfigMap({ConfigMap this.root: null, Map other: const {}}) {
+  ConfigMap(other, {ConfigMap this.root: null}) {
     if (root == null) root = this;
     _data = _convert(other, (v) => v is Map, (v) => new ConfigMap(root: root, other: v));
   }
@@ -59,7 +59,7 @@ class Configuration {
     configuration['__name__'] = name;
     _configurations[name] = {
       "parent": parent,
-      "configMap": new ConfigMap(other:configuration)
+      "configMap": configuration,
     };
   }
 
@@ -78,6 +78,6 @@ class Configuration {
     
     if (parent != null) configMap = mergeMaps(get(parent), configMap);
     
-    return configMap.toMap();
+    return new ConfigMap(configMap).toMap();
   }
 }
