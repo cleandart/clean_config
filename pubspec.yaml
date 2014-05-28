@@ -1,5 +1,5 @@
 name: clean_config
-version: 0.1.0
+version: 0.1.1
 author: Clean Team <clean@vacuumlabs.com>
 description: Simple library for managing configuration.
 homepage: https://github.com/cleandart/clean_config

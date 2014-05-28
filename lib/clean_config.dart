@@ -94,4 +94,6 @@ class Configuration {
 
     return new ConfigMap(configMap).toMap();
   }
+
+  Iterable<String> get names => _configurations.keys;
 }
