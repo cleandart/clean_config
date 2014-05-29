@@ -84,7 +84,9 @@ class Configuration {
    * Throws [ArgumentError] if configuration with [name] does not exists.
    */
   Map get(name) {
-    if (!_configurations.containsKey(name)) throw new ArgumentError("Configuration does not exist.");
+    if (!_configurations.containsKey(name)) {
+      throw new ArgumentError("Configuration with name '$name' does not exist.");
+    }
     var config = _configurations[name];
     var parent = config["parent"];
 
