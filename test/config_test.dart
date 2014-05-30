@@ -85,6 +85,15 @@ run() {
     }));
   });
 
+  test('Parent chain and computed values', () {
+    // given
+    config.add("parent", {'name': $((c) => "${c['firstname']} ${c['surname']}")});
+    config.add("child", {"firstname": "Peter", "surname": "Pan"}, parent: "parent");
+
+    // when
+    expect(config.get("child")['name'], "Peter Pan");
+  });
+
   test('Should work with parent', () {
     config.add("child", {
       "name" : "Carrot",
@@ -93,10 +102,10 @@ run() {
         "myurl" : $((c) => '${c['name']}/${c['id']}')
       }
     }, parent: "master");
-    expect(config.get("child"),equals({
+    expect(config.get("child"), equals({
       'page': {
         'title': 'My new homepage',
-        'url': 'master',
+        'url': 'child',
         'myurl': 'Carrot/8'
       },
       'name': 'Carrot',
@@ -105,27 +114,4 @@ run() {
     }));
   });
 
-  test('Long parent chain', () {
-    var numParents = 10;
-    for (int i = 0; i < numParents; i++) {
-      config.add("name${i}",{
-        "key${i}" : "value${i}",
-        "computation${i}" : $((c) => "Value is ${c['key${i}']} of map ${c['__name__']}"),
-        "innerMap" : {
-          "computation${i}" : $((c) => "Computation is: ${c['computation${i}']}")
-        }
-      }, parent: i == 0 ? null : "name${i-1}");
-    }
-    var expectedMap = {"__name__":"name${numParents-1}"};
-    for (int i = 0; i < numParents; i++) {
-      expectedMap["key${i}"] = "value${i}";
-      expectedMap["computation${i}"] = "Value is value${i} of map name${i}";
-      var innerMap = {};
-      for (int j = 0; j < numParents; j++) {
-        innerMap["computation${j}"] = "Computation is: Value is value${j} of map name${j}";
-      }
-      expectedMap["innerMap"] = innerMap;
-    }
-    expect(config.get("name${numParents-1}"), equals(expectedMap));
-  });
 }

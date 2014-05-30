@@ -84,6 +84,10 @@ class Configuration {
    * Throws [ArgumentError] if configuration with [name] does not exists.
    */
   Map get(name) {
+    return new ConfigMap(_get(name)).toMap();
+  }
+
+  Map _get(name) {
     if (!_configurations.containsKey(name)) {
       throw new ArgumentError("Configuration with name '$name' does not exist.");
     }
@@ -92,9 +96,8 @@ class Configuration {
 
     var configMap = config["configMap"];
 
-    if (parent != null) configMap = mergeMaps(get(parent), config["configMap"]);
-
-    return new ConfigMap(configMap).toMap();
+    if (parent != null) configMap = mergeMaps(_get(parent), config["configMap"]);
+    return configMap;
   }
 
   Iterable<String> get names => _configurations.keys;
