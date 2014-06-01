@@ -18,17 +18,10 @@ Map mergeMaps(Map a, Map b) {
 
 class ComputedValue {
   final _computation;
-  bool _evaluated = false;
-  dynamic _value;
   ComputedValue(dynamic this._computation(ConfigMap config));
 
   /** Lazy compute the value */
-  getValue(config) {
-    if (_evaluated) return _value;
-    _value = _computation(config);
-    _evaluated = true;
-    return _value;
-  }
+  getValue(config) => _computation(config);
 }
 
 $(dynamic computation(ConfigMap config)) => new ComputedValue(computation);
@@ -59,7 +52,12 @@ class ConfigMap {
     return _convert(_data, (k,v) => v is ConfigMap ? v.toMap() : this[k]);
   }
 
-  operator[](key) => _data[key] is ComputedValue ? _data[key].getValue(root) : _data[key];
+  operator[](key) {
+    _data[key] = (_data[key] is ComputedValue) ?
+                     _data[key].getValue(root) :
+                     _data[key];
+    return _data[key];
+  }
 }
 
 class Configuration {

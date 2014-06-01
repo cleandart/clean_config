@@ -94,6 +94,19 @@ run() {
     expect(config.get("child")['name'], "Peter Pan");
   });
 
+  test('Get multiple configs.', () {
+    // given
+    config.add("parent", {'name': $((c) => c['__name__'])});
+    config.add("child1", {}, parent: "parent");
+    config.add("child2", {}, parent: "parent");
+
+    // when & then
+    expect(config.get("child1"), {'__name__': 'child1', 'name': 'child1'});
+    expect(config.get("child2"), {'__name__': 'child2', 'name': 'child2'});
+
+    // then
+  });
+
   test('Should work with parent', () {
     config.add("child", {
       "name" : "Carrot",
